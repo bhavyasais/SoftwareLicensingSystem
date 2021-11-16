@@ -39,7 +39,7 @@ App = {
   },
 
   initContract: function() {
-      $.getJSON('Ballot.json', function(data) {
+      $.getJSON('License.json', function(data) {
     // Get the necessary contract artifact file and instantiate it with truffle-contract
     var voteArtifact = data;
     App.contracts.vote = TruffleContract(voteArtifact);
@@ -53,8 +53,8 @@ App = {
   },
 
   bindEvents: function() {
-    $(document).on('click', '.btn-vote', App.handleVote);
-    $(document).on('click', '#win-count', App.handleWinner);
+    //$(document).on('click', '.btn-vote', App.handleVote);
+    //$(document).on('click', '#win-count', App.handleWinner);
     $(document).on('click', '#register', function(){ var ad = $('#enter_address').val(); 
     var fn = $('#fname').val(); 
     var ln = $('#lname').val(); 
@@ -110,7 +110,7 @@ App = {
     })
 },
 
-  handleVote: function(event) {
+  /*handleVote: function(event) {
     event.preventDefault();
     var proposalId = parseInt($(event.target).data('id'));
     var voteInstance;
@@ -148,7 +148,7 @@ App = {
     }).catch(function(err){
       console.log(err.message);
     })
-  }
+  }*/
 };
 
 $(function() {

@@ -1,5 +1,5 @@
-var Ballot = artifacts.require("Ballot");
+var License = artifacts.require("License");
 
 module.exports = function(deployer) {
-  deployer.deploy(Ballot,4);
+  deployer.deploy(License,4);
 };

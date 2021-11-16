@@ -1,5 +1,5 @@
-pragma solidity >=0.4.22 <=0.6.0;
-contract Ballot {
+pragma solidity >=0.5.16;
+contract License {
 
     struct Voter {                     
         uint weight;
