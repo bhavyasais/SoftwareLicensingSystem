@@ -39,7 +39,7 @@ App = {
   },
 
   initContract: function() {
-      $.getJSON('License.json', function(data) {
+      $.getJSON('SoftwareLicensingSystem.json', function(data) {
     // Get the necessary contract artifact file and instantiate it with truffle-contract
     var voteArtifact = data;
     App.contracts.vote = TruffleContract(voteArtifact);
@@ -96,7 +96,7 @@ App = {
     var account = accounts[0];
     App.contracts.vote.deployed().then(function(instance) {
       voteInstance = instance;
-      return voteInstance.register(addr, fname,lname,organization,{from: account});
+      return voteInstance.registerCustomer(addr, fname,lname,organization,{from: account});
     }).then(function(result, err){
         if(result){
             if(parseInt(result.receipt.status) == 1)

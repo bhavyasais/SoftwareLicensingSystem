@@ -1,5 +1,5 @@
-var License = artifacts.require("License");
+var SoftwareLicensingSystem = artifacts.require("SoftwareLicensingSystem");
 
 module.exports = function(deployer) {
-  deployer.deploy(License,4);
+  deployer.deploy(SoftwareLicensingSystem,"SoftwareLicensingSystem","SLS",4);
 };
