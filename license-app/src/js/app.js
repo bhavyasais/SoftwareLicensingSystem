@@ -9,17 +9,17 @@ App = {
     {
       id: "0",
       name: "company-a",
-      address: "0xDFF10351C9567790152eB6e1b156809423308041",
+      owner: "0xDFF10351C9567790152eB6e1b156809423308041",
     },
     {
       id: "1",
       name: "company-b",
-      address: "0x8e2d75B08D13987dfF742de47dB412E846d8e212",
+      owner: "0x8e2d75B08D13987dfF742de47dB412E846d8e212",
     },
     {
       id: "2",
       name: "company-c",
-      address: "0x4b36472F71C26e9e7BAD146D09A234517AEa51C3",
+      owner: "0x4b36472F71C26e9e7BAD146D09A234517AEa51C3",
     },
     {
       id: "3",
@@ -59,6 +59,7 @@ App = {
 
     App.populateAddress();
     App.populateLicenses();
+    App.populateOwnerLicenses();
     return App.initContract();
   },
 
@@ -88,8 +89,23 @@ App = {
     });
 
     $(document).on("click", "#selectLicense", function () {
-      var name = $("#select_license").val();
-      App.handleLicenseRequest(name);
+      //var name = $("#select_license").val();
+      var customer = $("#enter_address").val();
+      var obj = App.licenses.find(
+        (element) =>
+          element.id == document.getElementById("select_license").value
+      );
+      //console.log(obj.owner,customer);
+      App.handleLicenseRequest(obj.id, obj.name, obj.owner, customer);
+    });
+
+    $(document).on("click", "#viewOwners", function () {
+      //var name = $("#select_license").val();
+      var obj = App.licenses.find(
+        (element) => element.id == document.getElementById("view_owner").value
+      );
+      //console.log(obj);
+      App.viewOwner(obj.id);
     });
   },
 
@@ -112,11 +128,19 @@ App = {
     const lic = App.licenses;
     jQuery.each(lic, function (key, value) {
       var optionElement =
-        '<option value="' + value.name + '">' + value.name + "</option";
+        '<option value="' + value.id + '">' + value.name + "</option";
       jQuery("#select_license").append(optionElement);
     });
   },
 
+  populateOwnerLicenses: function () {
+    const lic = App.licenses;
+    jQuery.each(lic, function (key, value) {
+      var optionElement =
+        '<option value="' + value.id + '">' + value.name + "</option";
+      jQuery("#view_owner").append(optionElement);
+    });
+  },
   /*getChairperson : function(){
     App.contracts.license.deployed().then(function(instance) {
       return instance;
@@ -162,6 +186,53 @@ App = {
           }
         });
     });
+  },
+
+  handleLicenseRequest: function (id, name, owner, customer) {
+    var licenseInstance;
+   web3.eth.getAccounts(function (error, accounts) {
+      var account = accounts[0];
+      App.contracts.license
+        .deployed()
+        .then(function (instance) {
+          licenseInstance = instance;
+          //console.log("seller "+owner+" customer "+customer)
+          return licenseInstance.transferOwner(id, name, owner, customer,{from:account});
+        })
+        .then(function (result, err) {
+          //console.log(result);
+          if (result) {
+            //console.log(App.licenses);
+            if (parseInt(result.receipt.status) == 1)
+              alert(name + " " + "license registration done successfully");
+            else
+              alert(addr + " registration not done successfully due to revert");
+          } else {
+            alert(addr + " registration failed");
+          }
+        });
+    });
+  },
+
+  viewOwner: function (id) {
+    //console.log("To get owner"+" "+id);
+    var bidInstance;
+    App.contracts.license
+      .deployed()
+      .then(function (instance) {
+        bidInstance = instance;
+        return bidInstance.viewOwner(id);
+      })
+      .then(function (res) {
+        alert("New owner is "+res);
+        //var winner = res.logs[0].args.winner;
+        //var highestBid = res.logs[0].args.highestBid.toNumber();
+        //toastr.info("Highest bid is " + highestBid + "<br>" + "Winner is " + winner, "", { "iconClass": 'toast-info notification3' });
+      })
+      .catch(function (err) {
+        console.log(err.message);
+        toastr["error"]("Error!");
+      });
   },
 
   /*handleVote: function(event) {

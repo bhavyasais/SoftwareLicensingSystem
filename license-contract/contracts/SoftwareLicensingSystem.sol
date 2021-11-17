@@ -140,12 +140,23 @@ contract SoftwareLicensingSystem is IERC20 {
         customers[_customer].lname = _lname;
         customers[_customer].organization = _organization;
     }
+
+    function registerLicense(uint256 _id, string memory _name, address _owner) public{
+        licenses[_id].id = _id;
+        licenses[_id].name = _name;
+        licenses[_id].owner = _owner;
+    }
     
     function getCustomer(address _address) view public returns (string memory, string memory,string memory) {
         return (customers[_address].fname, customers[_address].lname, customers[_address].organization);
     }
     
-    function transferOwner(address _customer, uint256 _id) public{
+    function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public{
+        registerLicense(_id, _name, _seller);
         licenses[_id].owner = _customer;
+    }
+
+    function viewOwner(uint256 id) public view returns (address currOwner) {
+        return licenses[id].owner;
     }
 }
