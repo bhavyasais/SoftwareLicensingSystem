@@ -2,10 +2,33 @@ App = {
   web3Provider: null,
   contracts: {},
   names: new Array(),
-  url: 'http://127.0.0.1:7545',
-  chairPerson:null,
-  currentAccount:null,
-  init: function() {
+  url: "http://127.0.0.1:7545",
+  chairPerson: null,
+  currentAccount: null,
+  licenses: [
+    {
+      id: "0",
+      name: "company-a",
+      address: "0xDFF10351C9567790152eB6e1b156809423308041",
+    },
+    {
+      id: "1",
+      name: "company-b",
+      address: "0x8e2d75B08D13987dfF742de47dB412E846d8e212",
+    },
+    {
+      id: "2",
+      name: "company-c",
+      address: "0x4b36472F71C26e9e7BAD146D09A234517AEa51C3",
+    },
+    {
+      id: "3",
+      name: "company-d",
+      address: "0xD891Ae92031b6D38bB2eE6BD5528F5178e8adbcA",
+    },
+  ],
+
+  init: function () {
     /*$.getJSON('../proposals.json', function(data) {
       var proposalsRow = $('#proposalsRow');
       var proposalTemplate = $('#proposalTemplate');
@@ -13,7 +36,7 @@ App = {
       for (i = 0; i < data.length; i ++) {
         proposalTemplate.find('.panel-title').text(data[i].name);
         proposalTemplate.find('img').attr('src', data[i].picture);
-        proposalTemplate.find('.btn-vote').attr('data-id', data[i].id);
+        proposalTemplate.find('.btn-license').attr('data-id', data[i].id);
 
         proposalsRow.append(proposalTemplate.html());
         App.names.push(data[i].name);
@@ -22,9 +45,9 @@ App = {
     return App.initWeb3();
   },
 
-  initWeb3: function() {
-        // Is there is an injected web3 instance?
-    if (typeof web3 !== 'undefined') {
+  initWeb3: function () {
+    // Is there is an injected web3 instance?
+    if (typeof web3 !== "undefined") {
       App.web3Provider = web3.currentProvider;
     } else {
       // If no injected web3 instance is detected, fallback to the TestRPC
@@ -35,47 +58,67 @@ App = {
     ethereum.enable();
 
     App.populateAddress();
+    App.populateLicenses();
     return App.initContract();
   },
 
-  initContract: function() {
-      $.getJSON('SoftwareLicensingSystem.json', function(data) {
-    // Get the necessary contract artifact file and instantiate it with truffle-contract
-    var voteArtifact = data;
-    App.contracts.vote = TruffleContract(voteArtifact);
+  initContract: function () {
+    $.getJSON("SoftwareLicensingSystem.json", function (data) {
+      // Get the necessary contract artifact file and instantiate it with truffle-contract
+      var licenseArtifact = data;
+      App.contracts.license = TruffleContract(licenseArtifact);
 
-    // Set the provider for our contract
-    App.contracts.vote.setProvider(App.web3Provider);
-    
-    App.getChairperson();
-    return App.bindEvents();
-  });
-  },
+      // Set the provider for our contract
+      App.contracts.license.setProvider(App.web3Provider);
 
-  bindEvents: function() {
-    //$(document).on('click', '.btn-vote', App.handleVote);
-    //$(document).on('click', '#win-count', App.handleWinner);
-    $(document).on('click', '#register', function(){ var ad = $('#enter_address').val(); 
-    var fn = $('#fname').val(); 
-    var ln = $('#lname').val(); 
-    var org = $('#organization').val();
-    App.handleRegister(ad,fn,ln,org); });
-  },
-
-  populateAddress : function(){
-    new Web3(new Web3.providers.HttpProvider(App.url)).eth.getAccounts((err, accounts) => {
-      web3.eth.defaultAccount=web3.eth.accounts[0]
-      jQuery.each(accounts,function(i){
-        if(web3.eth.coinbase != accounts[i]){
-          var optionElement = '<option value="'+accounts[i]+'">'+accounts[i]+'</option';
-          jQuery('#enter_address').append(optionElement);  
-        }
-      });
+      //App.getChairperson();
+      return App.bindEvents();
     });
   },
 
-  getChairperson : function(){
-    App.contracts.vote.deployed().then(function(instance) {
+  bindEvents: function () {
+    //$(document).on('click', '.btn-license', App.handleVote);
+    //$(document).on('click', '#win-count', App.handleWinner);
+    $(document).on("click", "#register", function () {
+      var ad = $("#enter_address").val();
+      var fn = $("#fname").val();
+      var ln = $("#lname").val();
+      var org = $("#organization").val();
+      App.handleRegister(ad, fn, ln, org);
+    });
+
+    $(document).on("click", "#selectLicense", function () {
+      var name = $("#select_license").val();
+      App.handleLicenseRequest(name);
+    });
+  },
+
+  populateAddress: function () {
+    new Web3(new Web3.providers.HttpProvider(App.url)).eth.getAccounts(
+      (err, accounts) => {
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+        jQuery.each(accounts, function (i) {
+          if (web3.eth.coinbase != accounts[i]) {
+            var optionElement =
+              '<option value="' + accounts[i] + '">' + accounts[i] + "</option";
+            jQuery("#enter_address").append(optionElement);
+          }
+        });
+      }
+    );
+  },
+
+  populateLicenses: function () {
+    const lic = App.licenses;
+    jQuery.each(lic, function (key, value) {
+      var optionElement =
+        '<option value="' + value.name + '">' + value.name + "</option";
+      jQuery("#select_license").append(optionElement);
+    });
+  },
+
+  /*getChairperson : function(){
+    App.contracts.license.deployed().then(function(instance) {
       return instance;
     }).then(function(result) {
       App.chairPerson = result.constructor.currentProvider.selectedAddress.toString();
@@ -88,40 +131,51 @@ App = {
         jQuery('#register_div').css('display','block');
       }
     })
-  },
+  },*/
 
-  handleRegister: function(addr,fname,lname,organization){
-    var voteInstance;
-    web3.eth.getAccounts(function(error, accounts) {
-    var account = accounts[0];
-    App.contracts.vote.deployed().then(function(instance) {
-      voteInstance = instance;
-      return voteInstance.registerCustomer(addr, fname,lname,organization,{from: account});
-    }).then(function(result, err){
-        if(result){
-            if(parseInt(result.receipt.status) == 1)
-            alert(addr + " "+fname+" "+ "registration done successfully")
+  handleRegister: function (addr, fname, lname, organization) {
+    var licenseInstance;
+    web3.eth.getAccounts(function (error, accounts) {
+      var account = accounts[0];
+      App.contracts.license
+        .deployed()
+        .then(function (instance) {
+          licenseInstance = instance;
+          return licenseInstance.registerCustomer(
+            addr,
+            fname,
+            lname,
+            organization,
+            { from: account }
+          );
+        })
+        .then(function (result, err) {
+          if (result) {
+            if (parseInt(result.receipt.status) == 1)
+              alert(
+                addr + " " + fname + " " + "registration done successfully"
+              );
             else
-            alert(addr + " registration not done successfully due to revert")
-        } else {
-            alert(addr + " registration failed")
-        }   
-    })
-    })
-},
+              alert(addr + " registration not done successfully due to revert");
+          } else {
+            alert(addr + " registration failed");
+          }
+        });
+    });
+  },
 
   /*handleVote: function(event) {
     event.preventDefault();
     var proposalId = parseInt($(event.target).data('id'));
-    var voteInstance;
+    var licenseInstance;
 
     web3.eth.getAccounts(function(error, accounts) {
       var account = accounts[0];
 
-      App.contracts.vote.deployed().then(function(instance) {
-        voteInstance = instance;
+      App.contracts.license.deployed().then(function(instance) {
+        licenseInstance = instance;
 
-        return voteInstance.vote(proposalId, {from: account});
+        return licenseInstance.license(proposalId, {from: account});
       }).then(function(result, err){
             if(result){
                 console.log(result.receipt.status);
@@ -138,10 +192,10 @@ App = {
 
   handleWinner : function() {
     console.log("To get winner");
-    var voteInstance;
-    App.contracts.vote.deployed().then(function(instance) {
-      voteInstance = instance;
-      return voteInstance.reqWinner();
+    var licenseInstance;
+    App.contracts.license.deployed().then(function(instance) {
+      licenseInstance = instance;
+      return licenseInstance.reqWinner();
     }).then(function(res){
     console.log(res);
       alert(App.names[res] + "  is the winner ! :)");
@@ -151,8 +205,8 @@ App = {
   }*/
 };
 
-$(function() {
-  $(window).load(function() {
+$(function () {
+  $(window).load(function () {
     App.init();
   });
 });

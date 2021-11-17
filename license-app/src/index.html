@@ -21,7 +21,7 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-sm-8 col-sm-push-2">
-          <h1 class="text-center">Register To Request Software</h1>
+          <h1 class="text-center">Register To Request Software License</h1>
           <hr/>
           <br/>
         </div>
@@ -51,13 +51,13 @@
     <div class="container">
       <div class="row" id="address_div">
         <div style="margin-left: 15px;margin-top: 10px;">
-          <span> Register Address : </span>
+          <span> Register Address : </span><br>
           <select id="enter_address" value=""></select>
-          <form >
+          <form ><br>
             <label for="fname">First name:</label><br>
             <input type="text" id="fname" name="fname" value=""><br>
             <label for="lname">Last name:</label><br>
-            <input type="text" id="lname" name="lname" value=""><br><br>
+            <input type="text" id="lname" name="lname" value=""><br>
             <label for="lname">Organization:</label><br>
             <input type="text" id="organization" name="organization" value=""><br><br>
           </form> 
@@ -71,6 +71,18 @@
         </div>
       </div>
       <br>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-8 col-sm-push-2 requestSoftware">
+        <div style="margin-left: 15px;margin-top: 10px;">
+          <span> Request Software License : </span><br>
+          <select id="select_license" value=""></select></div>
+      </div>
+    </div><br>
+    <div class="row" id="register_div">
+      <div style="margin-left: 90px;">
+        <button class="btn btn-info" type="button" id="selectLicense">Select</button>
+      </div>
     </div>
     </div>
 
