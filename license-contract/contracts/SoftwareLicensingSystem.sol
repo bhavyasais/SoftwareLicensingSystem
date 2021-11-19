@@ -48,7 +48,15 @@ contract SoftwareLicensingSystem is IERC20 {
     address[] public customerAddresses;
 
     mapping (uint256 => License) licenses;
-    
+
+    mapping (address=>uint) sls_membership;
+
+    modifier onlyCustomer{
+        require(sls_membership[msg.sender]==1);
+        _;
+    }
+
+
     function setCustomer(address _address, string memory _fname, string memory _lname, string memory _organization) internal virtual{
         customers[_address] = Customer(
             {
@@ -139,9 +147,10 @@ contract SoftwareLicensingSystem is IERC20 {
         customers[_customer].fname = _fname;
         customers[_customer].lname = _lname;
         customers[_customer].organization = _organization;
+        sls_membership[_customer]=1;
     }
 
-    function registerLicense(uint256 _id, string memory _name, address _owner) public{
+    function requestLicense(uint256 _id, string memory _name, address _owner) public{
         licenses[_id].id = _id;
         licenses[_id].name = _name;
         licenses[_id].owner = _owner;
@@ -151,8 +160,8 @@ contract SoftwareLicensingSystem is IERC20 {
         return (customers[_address].fname, customers[_address].lname, customers[_address].organization);
     }
     
-    function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public{
-        registerLicense(_id, _name, _seller);
+    function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer{
+        requestLicense(_id, _name, _seller);
         licenses[_id].owner = _customer;
     }
 
