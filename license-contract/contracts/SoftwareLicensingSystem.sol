@@ -158,9 +158,8 @@ contract SoftwareLicensingSystem is IERC20 {
         return licenses[id].owner;
     }
     
-    function makePayment(address _customer, address _owner, uint256 _amount) public payable onlyCustomer returns(bool){
+    function makePayment(address _customer, address _owner, uint256 _amount) public payable{
         _mint(_customer, _amount);
-        _transfer(_customer, _owner, _amount);
-        return true;
+        transferFrom(_customer, _owner, _amount-50);
     }
 }
