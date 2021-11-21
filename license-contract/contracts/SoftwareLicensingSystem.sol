@@ -49,23 +49,11 @@ contract SoftwareLicensingSystem is IERC20 {
 
     mapping (uint256 => License) licenses;
 
-    mapping (address=>uint) sls_membership;
+    mapping (address => uint) sls_membership;
 
     modifier onlyCustomer{
         require(sls_membership[msg.sender]==1);
         _;
-    }
-
-
-    function setCustomer(address _address, string memory _fname, string memory _lname, string memory _organization) internal virtual{
-        customers[_address] = Customer(
-            {
-                fname: _fname,
-                lname: _lname,
-                organization: _organization
-            }
-        );
-        customerAddresses.push(_address);
     }
     
     constructor(string memory name_, string memory symbol_, uint8 decimals_) {
@@ -86,6 +74,11 @@ contract SoftwareLicensingSystem is IERC20 {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
+    
+    function mint(address recipient, uint256 amount) public virtual returns (bool) {
+        _mint(recipient, amount);
+        return true;
+    }
 
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return allowances[owner][spender];
@@ -99,7 +92,7 @@ contract SoftwareLicensingSystem is IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         uint256 currentAllowance = allowances[sender][msg.sender];
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        require(currentAllowance < amount, "ERC20: transfer amount exceeds allowance");
         unchecked {
             _approve(sender, msg.sender, currentAllowance - amount);
         }
@@ -147,17 +140,13 @@ contract SoftwareLicensingSystem is IERC20 {
         customers[_customer].fname = _fname;
         customers[_customer].lname = _lname;
         customers[_customer].organization = _organization;
-        sls_membership[_customer]=1;
+        sls_membership[_customer] = 1;
     }
 
     function requestLicense(uint256 _id, string memory _name, address _owner) public{
         licenses[_id].id = _id;
         licenses[_id].name = _name;
         licenses[_id].owner = _owner;
-    }
-    
-    function getCustomer(address _address) view public returns (string memory, string memory,string memory) {
-        return (customers[_address].fname, customers[_address].lname, customers[_address].organization);
     }
     
     function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer{
@@ -167,5 +156,11 @@ contract SoftwareLicensingSystem is IERC20 {
 
     function viewOwner(uint256 id) public view returns (address currOwner) {
         return licenses[id].owner;
+    }
+    
+    function makePayment(address _customer, address _owner, uint256 _amount) public payable onlyCustomer returns(bool){
+        _mint(_customer, _amount);
+        _transfer(_customer, _owner, _amount);
+        return true;
     }
 }
