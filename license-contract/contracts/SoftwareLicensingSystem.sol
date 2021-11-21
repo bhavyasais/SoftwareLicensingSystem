@@ -51,8 +51,8 @@ contract SoftwareLicensingSystem is IERC20 {
 
     mapping (address => uint) sls_membership;
 
-    modifier onlyCustomer{
-        require(sls_membership[msg.sender]==1);
+    modifier onlyCustomer(address customer){
+        require(sls_membership[customer]==1);
         _;
     }
     
@@ -149,7 +149,7 @@ contract SoftwareLicensingSystem is IERC20 {
         licenses[_id].owner = _owner;
     }
     
-    function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer{
+    function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer(_customer){
         requestLicense(_id, _name, _seller);
         licenses[_id].owner = _customer;
     }
