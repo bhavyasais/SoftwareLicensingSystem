@@ -31,6 +31,7 @@ contract SoftwareLicensingSystem is IERC20 {
     string private name;
     string private symbol;
     uint8 public decimals;
+    uint256 private licenseValue = 10;
     
     struct Customer {
         string fname;
@@ -150,8 +151,12 @@ contract SoftwareLicensingSystem is IERC20 {
     }
     
     function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer(_customer){
-        requestLicense(_id, _name, _seller);
-        licenses[_id].owner = _customer;
+        if(balances[_seller] == licenseValue){
+            requestLicense(_id, _name, _seller);
+            licenses[_id].owner = _customer;
+        }
+        else
+            revert();
     }
 
     function viewOwner(uint256 id) public view returns (address currOwner) {
@@ -160,6 +165,6 @@ contract SoftwareLicensingSystem is IERC20 {
     
     function makePayment(address _customer, address _owner, uint256 _amount) public payable{
         _mint(_customer, _amount);
-        transferFrom(_customer, _owner, _amount-50);
+        transferFrom(_customer, _owner, licenseValue);
     }
 }
