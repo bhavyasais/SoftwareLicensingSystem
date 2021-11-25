@@ -107,6 +107,16 @@ App = {
       //console.log(obj);
       App.viewOwner(obj.id);
     });
+
+    $(document).on("click", "#makePayment", function () {
+      var customer = $("#enter_address").val();
+      var obj = App.licenses.find(
+        (element) =>
+          element.id == document.getElementById("select_license").value
+      );
+      console.log(customer,obj.owner);
+      App.makePayment(customer,obj.owner,70);
+    });
   },
 
   populateAddress: function () {
@@ -205,6 +215,32 @@ App = {
             //console.log(App.licenses);
             if (parseInt(result.receipt.status) == 1)
               alert(name + " " + "license registration done successfully");
+            else
+              alert(addr + " registration not done successfully due to revert");
+          } else {
+            alert(addr + " registration failed");
+          }
+        });
+    });
+  },
+
+  makePayment: function (customer, owner, amount) {
+    var licenseInstance;
+   web3.eth.getAccounts(function (error, accounts) {
+      var account = accounts[0];
+      App.contracts.license
+        .deployed()
+        .then(function (instance) {
+          licenseInstance = instance;
+          //console.log("seller "+owner+" customer "+customer)
+          return licenseInstance.makePayment(customer, owner, amount,{from:account});
+        })
+        .then(function (result, err) {
+          //console.log(result);
+          if (result) {
+            //console.log(App.licenses);
+            if (parseInt(result.receipt.status) == 1)
+              alert(name + " " + "payment successful");
             else
               alert(addr + " registration not done successfully due to revert");
           } else {
