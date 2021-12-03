@@ -29,28 +29,13 @@ App = {
   ],
 
   init: function () {
-    /*$.getJSON('../proposals.json', function(data) {
-      var proposalsRow = $('#proposalsRow');
-      var proposalTemplate = $('#proposalTemplate');
-
-      for (i = 0; i < data.length; i ++) {
-        proposalTemplate.find('.panel-title').text(data[i].name);
-        proposalTemplate.find('img').attr('src', data[i].picture);
-        proposalTemplate.find('.btn-license').attr('data-id', data[i].id);
-
-        proposalsRow.append(proposalTemplate.html());
-        App.names.push(data[i].name);
-      }
-    });*/
     return App.initWeb3();
   },
 
   initWeb3: function () {
-    // Is there is an injected web3 instance?
     if (typeof web3 !== "undefined") {
       App.web3Provider = web3.currentProvider;
     } else {
-      // If no injected web3 instance is detected, fallback to the TestRPC
       App.web3Provider = new Web3.providers.HttpProvider(App.url);
     }
     web3 = new Web3(App.web3Provider);
@@ -65,21 +50,16 @@ App = {
 
   initContract: function () {
     $.getJSON("SoftwareLicensingSystem.json", function (data) {
-      // Get the necessary contract artifact file and instantiate it with truffle-contract
       var licenseArtifact = data;
       App.contracts.license = TruffleContract(licenseArtifact);
 
-      // Set the provider for our contract
       App.contracts.license.setProvider(App.web3Provider);
 
-      //App.getChairperson();
       return App.bindEvents();
     });
   },
 
   bindEvents: function () {
-    //$(document).on('click', '.btn-license', App.handleVote);
-    //$(document).on('click', '#win-count', App.handleWinner);
     $(document).on("click", "#register", function () {
       var ad = $("#enter_address").val();
       var fn = $("#fname").val();
@@ -89,22 +69,18 @@ App = {
     });
 
     $(document).on("click", "#selectLicense", function () {
-      //var name = $("#select_license").val();
       var customer = $("#enter_address").val();
       var obj = App.licenses.find(
         (element) =>
           element.id == document.getElementById("select_license").value
       );
-      //console.log(obj.owner,customer);
       App.handleLicenseRequest(obj.id, obj.name, obj.owner, customer);
     });
 
     $(document).on("click", "#viewOwners", function () {
-      //var name = $("#select_license").val();
       var obj = App.licenses.find(
         (element) => element.id == document.getElementById("view_owner").value
       );
-      //console.log(obj);
       App.viewOwner(obj.id);
     });
 
@@ -151,21 +127,6 @@ App = {
       jQuery("#view_owner").append(optionElement);
     });
   },
-  /*getChairperson : function(){
-    App.contracts.license.deployed().then(function(instance) {
-      return instance;
-    }).then(function(result) {
-      App.chairPerson = result.constructor.currentProvider.selectedAddress.toString();
-      App.currentAccount = web3.eth.coinbase;
-      if(App.chairPerson != App.currentAccount){
-        jQuery('#address_div').css('display','none');
-        jQuery('#register_div').css('display','none');
-      }else{
-        jQuery('#address_div').css('display','block');
-        jQuery('#register_div').css('display','block');
-      }
-    })
-  },*/
 
   handleRegister: function (addr, fname, lname, organization) {
     var licenseInstance;
@@ -206,13 +167,10 @@ App = {
         .deployed()
         .then(function (instance) {
           licenseInstance = instance;
-          //console.log("seller "+owner+" customer "+customer)
           return licenseInstance.transferOwner(id, name, owner, customer,{from:account});
         })
         .then(function (result, err) {
-          //console.log(result);
           if (result) {
-            //console.log(App.licenses);
             if (parseInt(result.receipt.status) == 1)
               alert(name + " " + "license registration done successfully");
             else
@@ -232,13 +190,10 @@ App = {
         .deployed()
         .then(function (instance) {
           licenseInstance = instance;
-          //console.log("seller "+owner+" customer "+customer)
           return licenseInstance.makePayment(customer, owner, amount,{from:account});
         })
         .then(function (result, err) {
-          //console.log(result);
           if (result) {
-            //console.log(App.licenses);
             if (parseInt(result.receipt.status) == 1)
               alert(name + " " + "payment successful");
             else
@@ -251,7 +206,6 @@ App = {
   },
 
   viewOwner: function (id) {
-    //console.log("To get owner"+" "+id);
     var bidInstance;
     App.contracts.license
       .deployed()
@@ -261,55 +215,12 @@ App = {
       })
       .then(function (res) {
         alert("New owner is "+res);
-        //var winner = res.logs[0].args.winner;
-        //var highestBid = res.logs[0].args.highestBid.toNumber();
-        //toastr.info("Highest bid is " + highestBid + "<br>" + "Winner is " + winner, "", { "iconClass": 'toast-info notification3' });
       })
       .catch(function (err) {
         console.log(err.message);
         toastr["error"]("Error!");
       });
   },
-
-  /*handleVote: function(event) {
-    event.preventDefault();
-    var proposalId = parseInt($(event.target).data('id'));
-    var licenseInstance;
-
-    web3.eth.getAccounts(function(error, accounts) {
-      var account = accounts[0];
-
-      App.contracts.license.deployed().then(function(instance) {
-        licenseInstance = instance;
-
-        return licenseInstance.license(proposalId, {from: account});
-      }).then(function(result, err){
-            if(result){
-                console.log(result.receipt.status);
-                if(parseInt(result.receipt.status) == 1)
-                alert(account + " voting done successfully")
-                else
-                alert(account + " voting not done successfully due to revert")
-            } else {
-                alert(account + " voting failed")
-            }   
-        });
-    });
-  },
-
-  handleWinner : function() {
-    console.log("To get winner");
-    var licenseInstance;
-    App.contracts.license.deployed().then(function(instance) {
-      licenseInstance = instance;
-      return licenseInstance.reqWinner();
-    }).then(function(res){
-    console.log(res);
-      alert(App.names[res] + "  is the winner ! :)");
-    }).catch(function(err){
-      console.log(err.message);
-    })
-  }*/
 };
 
 $(function () {
