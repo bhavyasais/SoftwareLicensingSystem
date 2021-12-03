@@ -4,22 +4,34 @@
 pragma solidity >=0.5.16;
 
 interface IERC20 {
-    
     function totalSupply() external view returns (uint256);
 
     function balanceOf(address account) external view returns (uint256);
-    
-    function transfer(address recipient, uint256 amount) external returns (bool);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function transfer(address recipient, uint256 amount)
+        external
+        returns (bool);
+
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
 
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 }
 
 contract SoftwareLicensingSystem is IERC20 {
@@ -32,32 +44,36 @@ contract SoftwareLicensingSystem is IERC20 {
     string private symbol;
     uint8 public decimals;
     uint256 private licenseValue = 10;
-    
+
     struct Customer {
         string fname;
         string lname;
         string organization;
     }
-    
+
     struct License {
         uint256 id;
         string name;
         address owner;
     }
-    
-    mapping (address => Customer) customers;
+
+    mapping(address => Customer) customers;
     address[] public customerAddresses;
 
-    mapping (uint256 => License) licenses;
+    mapping(uint256 => License) licenses;
 
-    mapping (address => uint) sls_membership;
+    mapping(address => uint256) sls_membership;
 
-    modifier onlyCustomer(address customer){
-        require(sls_membership[customer]==1);
+    modifier onlyCustomer(address customer) {
+        require(sls_membership[customer] == 1);
         _;
     }
-    
-    constructor(string memory name_, string memory symbol_, uint8 decimals_) {
+
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
+    ) {
         name = name_;
         symbol = symbol_;
         decimals = decimals_;
@@ -67,44 +83,84 @@ contract SoftwareLicensingSystem is IERC20 {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return balances[account];
     }
 
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address recipient, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
-    
-    function mint(address recipient, uint256 amount) public virtual returns (bool) {
+
+    function mint(address recipient, uint256 amount)
+        public
+        virtual
+        returns (bool)
+    {
         _mint(recipient, amount);
         return true;
     }
 
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return allowances[owner][spender];
     }
-    
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+
+    function approve(address spender, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         _approve(msg.sender, spender, amount);
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         uint256 currentAllowance = allowances[sender][msg.sender];
-        require(currentAllowance < amount, "ERC20: transfer amount exceeds allowance");
+        require(
+            currentAllowance < amount,
+            "ERC20: transfer amount exceeds allowance"
+        );
         unchecked {
             _approve(sender, msg.sender, currentAllowance - amount);
         }
         return true;
     }
 
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual {
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
         uint256 senderBalance = balances[msg.sender];
-        require(senderBalance < amount, "ERC20: transfer amount exceeds balance");
+        require(
+            senderBalance < amount,
+            "ERC20: transfer amount exceeds balance"
+        );
         unchecked {
             balances[sender] = senderBalance - amount;
         }
@@ -112,7 +168,11 @@ contract SoftwareLicensingSystem is IERC20 {
         emit Transfer(sender, recipient, amount);
     }
 
-    function _approve(address owner, address spender, uint256 amount) internal virtual {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
         allowances[owner][spender] = amount;
@@ -136,34 +196,50 @@ contract SoftwareLicensingSystem is IERC20 {
         _totalSupply -= amount;
         emit Transfer(account, address(0), amount);
     }
-    
-    function registerCustomer(address _customer, string memory _fname, string memory _lname, string memory _organization) public{
+
+    function registerCustomer(
+        address _customer,
+        string memory _fname,
+        string memory _lname,
+        string memory _organization
+    ) public {
         customers[_customer].fname = _fname;
         customers[_customer].lname = _lname;
         customers[_customer].organization = _organization;
         sls_membership[_customer] = 1;
     }
 
-    function requestLicense(uint256 _id, string memory _name, address _owner) public{
+    function requestLicense(
+        uint256 _id,
+        string memory _name,
+        address _owner
+    ) public {
         licenses[_id].id = _id;
         licenses[_id].name = _name;
         licenses[_id].owner = _owner;
     }
-    
-    function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer(_customer){
-        if(balances[_seller] == licenseValue){
+
+    function transferOwner(
+        uint256 _id,
+        string memory _name,
+        address _seller,
+        address _customer
+    ) public onlyCustomer(_customer) {
+        if (balances[_seller] == licenseValue) {
             requestLicense(_id, _name, _seller);
             licenses[_id].owner = _customer;
-        }
-        else
-            revert();
+        } else revert();
     }
 
     function viewOwner(uint256 id) public view returns (address currOwner) {
         return licenses[id].owner;
     }
-    
-    function makePayment(address _customer, address _owner, uint256 _amount) public payable{
+
+    function makePayment(
+        address _customer,
+        address _owner,
+        uint256 _amount
+    ) public payable {
         _mint(_customer, _amount);
         transferFrom(_customer, _owner, licenseValue);
     }
