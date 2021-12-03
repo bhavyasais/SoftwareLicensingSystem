@@ -24,7 +24,7 @@ App = {
     {
       id: "3",
       name: "company-d",
-      address: "0xD891Ae92031b6D38bB2eE6BD5528F5178e8adbcA",
+      owner: "0xD891Ae92031b6D38bB2eE6BD5528F5178e8adbcA",
     },
   ],
 
@@ -90,8 +90,8 @@ App = {
         (element) =>
           element.id == document.getElementById("select_license").value
       );
-      console.log(customer,obj.owner);
-      App.makePayment(customer,obj.owner,70);
+      //console.log(customer,obj.owner);
+      App.makePayment(customer, obj.owner, 70);
     });
   },
 
@@ -161,13 +161,15 @@ App = {
 
   handleLicenseRequest: function (id, name, owner, customer) {
     var licenseInstance;
-   web3.eth.getAccounts(function (error, accounts) {
+    web3.eth.getAccounts(function (error, accounts) {
       var account = accounts[0];
       App.contracts.license
         .deployed()
         .then(function (instance) {
           licenseInstance = instance;
-          return licenseInstance.transferOwner(id, name, owner, customer,{from:account});
+          return licenseInstance.transferOwner(id, name, owner, customer, {
+            from: account,
+          });
         })
         .then(function (result, err) {
           if (result) {
@@ -184,13 +186,15 @@ App = {
 
   makePayment: function (customer, owner, amount) {
     var licenseInstance;
-   web3.eth.getAccounts(function (error, accounts) {
+    web3.eth.getAccounts(function (error, accounts) {
       var account = accounts[0];
       App.contracts.license
         .deployed()
         .then(function (instance) {
           licenseInstance = instance;
-          return licenseInstance.makePayment(customer, owner, amount,{from:account});
+          return licenseInstance.makePayment(customer, owner, amount, {
+            from: account,
+          });
         })
         .then(function (result, err) {
           if (result) {
@@ -205,16 +209,18 @@ App = {
     });
   },
 
-  viewOwner: function (id) {
+  viewOwner: function (_id) {
     var bidInstance;
     App.contracts.license
       .deployed()
       .then(function (instance) {
         bidInstance = instance;
-        return bidInstance.viewOwner(id);
+        return bidInstance.viewOwner(_id);
       })
       .then(function (res) {
-        alert("New owner is "+res);
+        if (res == "0x0000000000000000000000000000000000000000")
+          alert("Owner is " + App.licenses.find(({ id }) => id === _id).owner);
+        else alert("New owner is " + res);
       })
       .catch(function (err) {
         console.log(err.message);
