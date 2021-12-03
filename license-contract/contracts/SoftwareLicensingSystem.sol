@@ -225,7 +225,7 @@ contract SoftwareLicensingSystem is IERC20 {
         address _seller,
         address _customer
     ) public onlyCustomer(_customer) {
-        if (balances[_seller] == licenseValue) {
+        if ( balances[_seller]>0 && balances[_seller] % licenseValue==0 ) {
             requestLicense(_id, _name, _seller);
             licenses[_id].owner = _customer;
         } else revert();
@@ -239,7 +239,7 @@ contract SoftwareLicensingSystem is IERC20 {
         address _customer,
         address _owner,
         uint256 _amount
-    ) public payable {
+    ) public payable onlyCustomer(_customer) {
         _mint(_customer, _amount);
         transferFrom(_customer, _owner, licenseValue);
     }
