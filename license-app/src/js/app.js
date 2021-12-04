@@ -9,7 +9,7 @@ App = {
     {
       id: "0",
       name: "company-a",
-      owner: "0xDFF10351C9567790152eB6e1b156809423308041",
+      owner: "0xc81c1b7C6B1449b90F7148DD52Db458f3ec4182C",
     },
     {
       id: "1",
