@@ -90,7 +90,6 @@ App = {
         (element) =>
           element.id == document.getElementById("select_license").value
       );
-      //console.log(customer,obj.owner);
       App.makePayment(customer, obj.owner, 70);
     });
   },
@@ -172,11 +171,12 @@ App = {
           });
         })
         .then(function (result, err) {
+          console.log("bhavya ",result, err)
           if (result) {
             if (parseInt(result.receipt.status) == 1)
               alert(name + " " + "license registration done successfully");
             else
-              alert(addr + " registration not done successfully due to revert");
+              alert(addr + " transfer of ownership request not done successfully due to revert");
           } else {
             alert(addr + " registration failed");
           }
@@ -199,11 +199,11 @@ App = {
         .then(function (result, err) {
           if (result) {
             if (parseInt(result.receipt.status) == 1)
-              alert(name + " " + "payment successful");
+              alert("payment successful");
             else
-              alert(addr + " registration not done successfully due to revert");
+              alert(addr + " payment not done successfully due to revert");
           } else {
-            alert(addr + " registration failed");
+            alert(addr + " payment failed");
           }
         });
     });
