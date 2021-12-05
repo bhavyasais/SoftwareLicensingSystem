@@ -151,12 +151,9 @@ contract SoftwareLicensingSystem is IERC20 {
     }
     
     function transferOwner(uint256 _id, string memory _name, address _seller, address _customer) public onlyCustomer(_customer){
-        if(balances[_seller] == licenseValue){
-            requestLicense(_id, _name, _seller);
-            licenses[_id].owner = _customer;
-        }
-        else
-            revert();
+        require(balances[_seller] == licenseValue);
+        requestLicense(_id, _name, _seller);
+        licenses[_id].owner = _customer;
     }
 
     function viewOwner(uint256 id) public view returns (address currOwner) {
@@ -165,7 +162,6 @@ contract SoftwareLicensingSystem is IERC20 {
     
     function makePayment(address _customer, address _owner, uint256 _amount) public payable onlyCustomer(_customer){
         _mint(_customer, _amount);
-        //transferFrom(_customer, _owner, licenseValue);
         _transfer(_customer,_owner,licenseValue);
     }
 }
