@@ -171,14 +171,13 @@ App = {
           });
         })
         .then(function (result, err) {
-          console.log("bhavya ",result, err)
           if (result) {
             if (parseInt(result.receipt.status) == 1)
-              alert(name + " " + "license registration done successfully");
+              alert(name + " " + "transfer of ownership done successfully");
             else
-              alert(addr + " transfer of ownership request not done successfully due to revert");
+              alert(addr + "transfer of ownership request not done successfully due to revert");
           } else {
-            alert(addr + " registration failed");
+            alert(addr + " transfer of ownership failed");
           }
         });
     });
